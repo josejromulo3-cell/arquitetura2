@@ -5,7 +5,6 @@ N_BITS = 32
 A = "11111111111111111111111111111111"
 B = "00000000000000000000000000000001"
 
-
 def NOT(x):
     return 1 - x
 
@@ -18,7 +17,6 @@ def OR(*entradas):
 def XOR(x, y):
     return 1 if x != y else 0
 
-
 def decodificador(f0, f1):
     en_and = AND(NOT(f0), NOT(f1))  # os dois são 0
     en_or = AND(NOT(f0), f1)        # f0 é 0 e f1 é 1
@@ -26,17 +24,14 @@ def decodificador(f0, f1):
     en_soma = AND(f0, f1)           # os dois são 1
     return en_and, en_or, en_notb, en_soma
 
-
 def unidade_logica(a, b):
     return AND(a, b), OR(a, b), NOT(b)
-
 
 def somador_completo(a, b, vem_um):
     a_xor_b = XOR(a, b)
     soma = XOR(a_xor_b, vem_um)
     vai_um = OR(AND(a, b), AND(a_xor_b, vem_um))
     return soma, vai_um
-
 
 def ula_1bit(a, b, f0, f1, ena, enb, inva, vem_um):
     a_cond = XOR(AND(a, ena), inva)
@@ -54,7 +49,6 @@ def ula_1bit(a, b, f0, f1, ena, enb, inva, vem_um):
     vai_um = AND(vai_um, en_soma)
     return a_cond, b_cond, s, vai_um
 
-
 def ula_32bits(a, b, f0, f1, ena, enb, inva, inc):
     a_cond = [""] * N_BITS
     b_cond = [""] * N_BITS
@@ -69,7 +63,6 @@ def ula_32bits(a, b, f0, f1, ena, enb, inva, inc):
         vem_um = vai_um
     return "".join(a_cond), "".join(b_cond), "".join(s), vai_um
 
-
 def executar_programa():
     with open("programa_etapa1.txt", "r", encoding="utf-8") as arquivo:
         linhas = arquivo.read().splitlines()
@@ -79,6 +72,13 @@ def executar_programa():
     def registrar(texto=""):
         print(texto)
         saida_linhas.append(texto)
+
+    registrar("Equipe:")
+    registrar("- José Rômulo de Oliveira Silva")
+    registrar("- Gustavo Gomes Souta da Silva")
+    registrar("- Rafael Soares Gomes Correia Lima")
+    registrar("============================================================")
+    registrar("")
 
     registrar(f"b = {B}")
     registrar(f"a = {A}")
