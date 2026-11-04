@@ -18,10 +18,10 @@ def XOR(x, y):
     return 1 if x != y else 0
 
 def decodificador(f0, f1):
-    en_and = AND(NOT(f0), NOT(f1))  # os dois são 0
-    en_or = AND(NOT(f0), f1)        # f0 é 0 e f1 é 1
-    en_notb = AND(f0, NOT(f1))      # f0 é 1 e f1 é 0
-    en_soma = AND(f0, f1)           # os dois são 1
+    en_and = AND(NOT(f0), NOT(f1))  
+    en_or = AND(NOT(f0), f1)        
+    en_notb = AND(f0, NOT(f1))      
+    en_soma = AND(f0, f1)           
     return en_and, en_or, en_notb, en_soma
 
 def unidade_logica(a, b):
@@ -39,7 +39,7 @@ def ula_1bit(a, b, f0, f1, ena, enb, inva, vem_um):
     en_and, en_or, en_notb, en_soma = decodificador(f0, f1)
     r_and, r_or, r_notb = unidade_logica(a_cond, b_cond)
     r_soma, vai_um = somador_completo(a_cond, b_cond, vem_um)
-    # parte do filtro
+    
     s = OR(
         AND(r_and, en_and),
         AND(r_or, en_or),
