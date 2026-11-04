@@ -1,3 +1,9 @@
+Equipe:
+- José Rômulo de Oliveira Silva
+- Gustavo Gomes Souta da Silva
+- Rafael Soares Gomes Correia Lima
+============================================================
+
 b = 00000000000000000000000000000001
 a = 11111111111111111111111111111111
 
