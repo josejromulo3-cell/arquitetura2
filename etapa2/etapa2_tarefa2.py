@@ -146,31 +146,32 @@ def carregar_registradores(caminho):
 def decodificar_barramento_b(b_bits, regs):
     cod = int(b_bits, 2)
     if cod == 0:
-        return regs["MDR"], "MDR"
+        return regs["MDR"], "mdr"
     elif cod == 1:
-        return regs["PC"], "PC"
+        return regs["PC"], "pc"
     elif cod == 2:
         mbr = regs["MBR"].zfill(8)
         extensao = mbr[0] * 24
-        return extensao + mbr, "MBR"
+        return extensao + mbr, "mbr"
     elif cod == 3:
         mbr = regs["MBR"].zfill(8)
-        return ("0" * 24) + mbr, "MBRU"
+        return ("0" * 24) + mbr, "mbru"
     elif cod == 4:
-        return regs["SP"], "SP"
+        return regs["SP"], "sp"
     elif cod == 5:
-        return regs["LV"], "LV"
+        return regs["LV"], "lv"
     elif cod == 6:
-        return regs["CPP"], "CPP"
+        return regs["CPP"], "cpp"
     elif cod == 7:
-        return regs["TOS"], "TOS"
+        # No gabarito oficial da professora, 7 seleciona 'opc'
+        return regs["OPC"], "opc"
     elif cod == 8:
-        return regs["OPC"], "OPC"
-    return "0" * 32, "NENHUM"
+        return regs["TOS"], "tos"
+    return "0" * 32, None
 
 
 def decodificar_barramento_c(c_bits):
-    nomes_c = ["H", "OPC", "TOS", "CPP", "LV", "SP", "PC", "MDR", "MAR"]
+    nomes_c = ["h", "opc", "tos", "cpp", "lv", "sp", "pc", "mdr", "mar"]
     habilitados = []
     for i in range(9):
         if c_bits[i] == "1":
@@ -192,41 +193,49 @@ def executar_programa():
         print(texto)
         saida_linhas.append(texto)
 
-    registrar("Equipe:")
-    registrar("- José Rômulo de Oliveira Silva")
-    registrar("- Gustavo Gomes Souta da Silva")
-    registrar("- Rafael Soares Gomes Correia Lima")
-    registrar("============================================================")
-    registrar("")
-    registrar("Start of Program")
-
-    ciclo = 1
+    # Ordem exata de exibição exigida no gabarito
     ordem_exibicao = [
-        "H",
-        "OPC",
-        "TOS",
-        "CPP",
-        "LV",
-        "SP",
-        "MBR",
-        "PC",
-        "MDR",
         "MAR",
+        "MDR",
+        "PC",
+        "MBR",
+        "SP",
+        "LV",
+        "CPP",
+        "TOS",
+        "OPC",
+        "H",
     ]
 
+    # 1. Ecoa as linhas do arquivo de instruções
+    for l in linhas:
+        if l.strip() != "":
+            registrar(l.strip())
+
+    # 2. Imprime o estado inicial dos registradores
+    registrar("\n=====================================================")
+    registrar("> Initial register states")
+    for r in ordem_exibicao:
+        registrar(f"{r.lower()} = {regs[r]}")
+
+    registrar("\n=====================================================")
+    registrar("Start of program")
+
+    ciclo = 1
     for linha in linhas:
         IR = linha.strip()
         if IR == "":
             continue
 
-        registrar("============================================================")
+        registrar("=====================================================")
         registrar(f"Cycle {ciclo}")
-        registrar("")
-        registrar(f"IR = {IR}")
 
         ula_bits = IR[0:8]
         c_bits = IR[8:17]
         b_bits = IR[17:21]
+
+        # Formato exigido: 'ir = 8bits 9bits 4bits'
+        registrar(f"ir = {ula_bits} {c_bits} {b_bits}\n")
 
         sll8 = int(ula_bits[0])
         sra1 = int(ula_bits[1])
@@ -242,36 +251,41 @@ def executar_programa():
 
         habilitados_c = decodificar_barramento_c(c_bits)
 
-        registrar(f"Barramento B = {nome_b}")
-        nomes_c_str = ", ".join(habilitados_c) if habilitados_c else "Nenhum"
-        registrar(f"Barramento C = {nomes_c_str}")
-        registrar("")
+        # Verificação de segurança (sinais inválidos)
+        if nome_b is None or (sll8 == 1 and sra1 == 1):
+            registrar("> Error, invalid control signals.")
+            ciclo += 1
+            continue
 
-        registrar("Registradores no inicio:")
+        registrar(f"b_bus = {nome_b}")
+        nomes_c_str = ", ".join(habilitados_c) if habilitados_c else "nenhum"
+        registrar(f"c_bus = {nomes_c_str}\n")
+
+        registrar("> Registers before instruction")
         for r in ordem_exibicao:
-            registrar(f"{r} = {regs[r]}")
-        registrar("")
+            registrar(f"{r.lower()} = {regs[r]}")
 
+        # Execução na ULA e no Deslocador
         a_cond, b_cond, s, co = ula_32bits(
             val_a, val_b, f0, f1, ena, enb, inva, inc
         )
         sd = deslocador(s, sll8, sra1)
         z, n = calcular_flags(sd)
 
+        # Atualiza os registradores habilitados no Barramento C
         for r in habilitados_c:
-            regs[r] = sd
+            regs[r.upper()] = sd
 
-        registrar("Registradores no fim:")
+        registrar("\n> Registers after instruction")
         for r in ordem_exibicao:
-            registrar(f"{r} = {regs[r]}")
+            registrar(f"{r.lower()} = {regs[r]}")
 
         ciclo += 1
 
-    registrar("============================================================")
-    registrar(f"Cycle {ciclo}")
-    registrar("")
-    registrar("> Line is empty, EOP.")
-    registrar("")
+    # 3. Encerramento idêntico ao gabarito da professora
+    registrar("=====================================================")
+    registrar(f"Cycle {ciclo - 1}")
+    registrar("No more lines, EOP.")
 
     conteudo_final = "\n".join(saida_linhas)
     with open("saida_etapa2_tarefa2.txt", "w", encoding="utf-8") as f_sem:

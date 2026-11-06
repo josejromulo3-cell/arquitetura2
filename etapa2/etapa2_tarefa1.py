@@ -2,8 +2,8 @@ import sys
 
 N_BITS = 32
 
-A = "11111111111111111111111111111111"
-B = "00000000000000000000000000000001"
+A = "00000000000000000000000000000001"
+B = "10000000000000000000000000000000"
 
 
 def NOT(x):
@@ -133,6 +133,10 @@ def executar_programa():
         enb = int(IR[5])
         inva = int(IR[6])
         inc = int(IR[7])
+        if sll8 == 1 and sra1 == 1:
+          registrar("> Error, invalid control signals.")
+          PC += 1
+          continue
 
         a_cond, b_cond, s, co = ula_32bits(A, B, f0, f1, ena, enb, inva, inc)
         sd = deslocador(s, sll8, sra1)
@@ -142,9 +146,9 @@ def executar_programa():
         registrar(f"a = {a_cond}")
         registrar(f"s = {s}")
         registrar(f"sd = {sd}")
-        registrar(f"co = {co}")
-        registrar(f"z = {z}")
         registrar(f"n = {n}")
+        registrar(f"z = {z}")
+        registrar(f"co = {co}")
         PC += 1
 
     registrar("============================================================")
